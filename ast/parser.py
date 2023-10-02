@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from enum import Enum
-
 from .chars import (
     is_coefficient_start,
     is_digit,
-    is_printable,
     is_variable_start,
     print_char_code,
 )
@@ -26,7 +22,7 @@ class ParseError(Exception):
         self.location = location
 
     def __repr__(self) -> str:
-        res = f"ParseError(source={self.source!r}, location={self.location!r}"
+        res = f"ParseError(source={self.source!r}, location={self.location}"
 
         if self.args:
             res += f", description={self.args[0]!r}"
