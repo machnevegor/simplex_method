@@ -29,7 +29,7 @@ def is_variable_continue(code: int) -> bool:
     return is_variable_start(code) or is_digit(code)  # <alpha> | `_` | <digit>
 
 
-def is_printable(code: int) -> bool:
+def is_ascii(code: int) -> bool:
     return 0x0020 <= code <= 0x007E  # <ASCII>
 
 
@@ -37,7 +37,7 @@ def print_code(code: int | None) -> None:
     if code is None:  # <EOF>
         return TokenKind.EOF.value
 
-    return chr(code) if is_printable(code) else f"U+{code:04X}"
+    return chr(code) if is_ascii(code) else f"U+{code:04X}"
 
 
 __all__ = (
@@ -48,6 +48,6 @@ __all__ = (
     "is_alpha",
     "is_variable_start",
     "is_variable_continue",
-    "is_printable",
+    "is_ascii",
     "print_code",
 )
