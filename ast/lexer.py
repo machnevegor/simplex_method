@@ -111,5 +111,61 @@ class Lexer:
             TokenKind.COEFFICIENT, start, position, self.source[start:position]
         )
 
+    def _next_token(self) -> Token:
+        position = self._token.end
+
+        while position < len(self.source):
+            char = self.source[position]
+            code = ord(char)
+
+            match code:
+                # Ignored:
+                # - Unicode BOM
+                # - White space
+                # - Line terminator
+                case 0xFEFF | 0x0009 | 0x0020:  # <BOM> | `\t` | <space>
+                    position += 1
+
+                    continue
+                case 0x000A:  # `\n`
+                    position += 1
+
+                    self._line += 1
+                    self._line_start = position
+
+                    continue
+                case 0x000D:  # `\r`
+                    position += (
+                        2 if ord(self.source[position + 1]) == 0x000A else 1
+                    )  # `\r\n` | `\r`
+
+                    self._line += 1
+                    self._line_start = position
+
+                    continue
+                # Single-char tokens:
+                # - Algebraic operator
+                # - Punctuator
+                case 0x002B | 0x002D | 0x002A | 0x0028 | 0x002F | 0x0029 | 0x003D:  # `+` | `-` | `*` | `(` | `)` | `=`
+                    return self._create_token(
+                        TokenKind(char), position, position + 1, char
+                    )
+
+            # Multi-char tokens:
+            # - Coefficient
+            # - Variable
+            if is_coefficient_start(code):  # <digit> | `.`
+                return self._read_coefficient(position, code)
+            if is_variable_start(code):  # <alpha> | `_`
+                return ...
+
+            raise LexerException(
+                self.source,
+                Location(self._line, 1 + position - self._line_start),
+                f"Invalid character: {print_code(code)}",
+            )
+
+        return self._create_token(TokenKind.EOF, position, position, "")
+
 
 __all__ = ("LexerException", "Lexer")
