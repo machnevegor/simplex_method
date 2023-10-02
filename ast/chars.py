@@ -23,7 +23,7 @@ def is_printable(code: int) -> bool:
     return 0x0020 <= code <= 0x007E  # <ASCII>
 
 
-def print_char_code(code: int | None) -> None:
+def print_code(code: int | None) -> None:
     if code is None:  # <EOF>
         return TokenKind.EOF.value
 
@@ -36,5 +36,5 @@ __all__ = (
     "is_coefficient_start",
     "is_variable_start",
     "is_printable",
-    "print_char_code",
+    "print_code",
 )

@@ -4,7 +4,7 @@ from .chars import (
     is_coefficient_start,
     is_digit,
     is_variable_start,
-    print_char_code,
+    print_code,
 )
 from .token import Location, Token, TokenKind
 
@@ -68,7 +68,7 @@ class Lexer:
             raise ParseError(
                 self.source,
                 Location(self._line, 1 + start - self._line_start),
-                f"Unexpected character, expected digit but got: {print_char_code(first_code)}",
+                f"Unexpected character, expected digit but got: {print_code(first_code)}",
             )
 
         position = start + 1
@@ -92,7 +92,7 @@ class Lexer:
                 raise ParseError(
                     self.source,
                     Location(self._line, 1 + position - self._line_start),
-                    f"Invalid coefficient, unexpected digit after 0: {print_char_code(code)}",
+                    f"Invalid coefficient, unexpected digit after 0: {print_code(code)}",
                 )
         elif code != 0x002E:  # not `.`
             position = self._read_digits(position, code)
@@ -122,7 +122,7 @@ class Lexer:
             raise ParseError(
                 self.source,
                 Location(self._line, 1 + position - self._line_start),
-                f"Invalid coefficient, expected digit but got: {print_char_code(code)}",
+                f"Invalid coefficient, expected digit but got: {print_code(code)}",
             )
 
         return self._create_token(
@@ -183,7 +183,7 @@ class Lexer:
             raise ParseError(
                 self.source,
                 Location(self._line, 1 + position - self._line_start),
-                f"Invalid character: {print_char_code(code)}",
+                f"Invalid character: {print_code(code)}",
             )
 
         return self._create_token(TokenKind.EOF, position, position, "")
