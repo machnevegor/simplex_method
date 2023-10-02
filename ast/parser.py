@@ -9,7 +9,7 @@ from .chars import (
 from .token import Location, Token, TokenKind
 
 
-class ParseError(Exception):
+class SyntaxException(Exception):
     source: str
     location: Location
 
@@ -20,14 +20,6 @@ class ParseError(Exception):
 
         self.source = source
         self.location = location
-
-    def __repr__(self) -> str:
-        res = f"ParseError(source={self.source!r}, location={self.location}"
-
-        if self.args:
-            res += f", description={self.args[0]!r}"
-
-        return res + ")"
 
 
 class Lexer:
@@ -65,7 +57,7 @@ class Lexer:
 
     def _read_digits(self, start: int, first_code: int | None) -> int:
         if not is_digit(first_code):  # not <DIGIT>
-            raise ParseError(
+            raise SyntaxException(
                 self.source,
                 Location(self._line, 1 + start - self._line_start),
                 f"Unexpected character, expected digit but got: {print_code(first_code)}",
@@ -89,7 +81,7 @@ class Lexer:
             code = self._read_code(position)
 
             if is_digit(code):  # <DIGIT>
-                raise ParseError(
+                raise SyntaxException(
                     self.source,
                     Location(self._line, 1 + position - self._line_start),
                     f"Invalid coefficient, unexpected digit after 0: {print_code(code)}",
@@ -119,7 +111,7 @@ class Lexer:
             code = self._read_code(position)
 
         if code == 0x002E or is_variable_start(code):  # `.` | <LETTER> | `_`
-            raise ParseError(
+            raise SyntaxException(
                 self.source,
                 Location(self._line, 1 + position - self._line_start),
                 f"Invalid coefficient, expected digit but got: {print_code(code)}",
@@ -180,7 +172,7 @@ class Lexer:
             if is_variable_start(code):  # <LETTER> | `_`
                 return ...
 
-            raise ParseError(
+            raise SyntaxException(
                 self.source,
                 Location(self._line, 1 + position - self._line_start),
                 f"Invalid character: {print_code(code)}",
