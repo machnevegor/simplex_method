@@ -164,7 +164,7 @@ class Lexer:
                 # Single-char tokens:
                 # - Algebraic operator
                 # - Punctuator
-                case 0x002B | 0x002D | 0x002A | 0x002F | 0x0028 | 0x0029:  # `+` | `-` | `*` | `/` | `(` | `)`
+                case 0x002B | 0x002D | 0x002A:  # `+` | `-` | `*`
                     return self._create_token(
                         TokenKind(char), position, position + 1, char
                     )

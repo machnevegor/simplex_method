@@ -11,10 +11,6 @@ class TokenKind(str, Enum):
     ADD = "+"
     SUB = "-"
     MUL = "*"
-    DIV = "/"
-
-    PAREN_L = "("
-    PAREN_R = ")"
 
     EQ = "="
     LEQ = "<="
