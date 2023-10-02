@@ -8,12 +8,11 @@ from .chars import (
     is_variable_start,
     print_code,
 )
+from .lexer import Lexer, LexerException
+from .parser import Parser
 from .token import Location, Token, TokenKind
 
 __all__ = (
-    "TokenKind",
-    "Token",
-    "Location",
     "is_digit",
     "is_coefficient_start",
     "is_lower_alpha",
@@ -22,4 +21,10 @@ __all__ = (
     "is_variable_start",
     "is_printable",
     "print_code",
+    "LexerException",
+    "Lexer",
+    "Parser",
+    "TokenKind",
+    "Token",
+    "Location",
 )
