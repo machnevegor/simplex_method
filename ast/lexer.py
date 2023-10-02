@@ -1,4 +1,10 @@
-from .chars import is_coefficient_start, is_digit, is_variable_start, print_code
+from .chars import (
+    is_coefficient_start,
+    is_digit,
+    is_variable_continue,
+    is_variable_start,
+    print_code,
+)
 from .token import Location, Token, TokenKind
 
 
@@ -111,6 +117,18 @@ class Lexer:
             TokenKind.COEFFICIENT, start, position, self.source[start:position]
         )
 
+    def _read_variable(self, start: int) -> Token:
+        position = start + 1
+
+        while position < len(self.source) and is_variable_continue(
+            self._read_code(position)
+        ):  # <alpha> | `_` | <digit>
+            position += 1
+
+        return self._create_token(
+            TokenKind.VARIABLE, start, position, self.source[start:position]
+        )
+
     def _next_token(self) -> Token:
         position = self._token.end
 
@@ -157,7 +175,7 @@ class Lexer:
             if is_coefficient_start(code):  # <digit> | `.`
                 return self._read_coefficient(position, code)
             if is_variable_start(code):  # <alpha> | `_`
-                return ...
+                return self._read_variable(position)
 
             raise LexerException(
                 self.source,
