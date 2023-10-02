@@ -154,7 +154,7 @@ class Lexer:
                     continue
                 case 0x000D:  # `\r`
                     position += (
-                        2 if ord(self.source[position + 1]) == 0x000A else 1
+                        2 if self._read_code(position + 1) == 0x000A else 1
                     )  # `\r\n` | `\r`
 
                     self._line += 1
@@ -164,9 +164,48 @@ class Lexer:
                 # Single-char tokens:
                 # - Algebraic operator
                 # - Punctuator
-                case 0x002B | 0x002D | 0x002A | 0x0028 | 0x002F | 0x0029 | 0x003D:  # `+` | `-` | `*` | `(` | `)` | `=`
+                case 0x002B | 0x002D | 0x002A | 0x002F | 0x0028 | 0x0029:  # `+` | `-` | `*` | `/` | `(` | `)`
                     return self._create_token(
                         TokenKind(char), position, position + 1, char
+                    )
+                case 0x003D:  # `=`
+                    if self._read_code(position + 1) == 0x003D:
+                        return self._create_token(
+                            TokenKind.EQ, position, position + 2, "=="
+                        )
+
+                    return self._create_token(
+                        TokenKind.EQ, position, position + 1, char
+                    )
+                case 0x003C:  # `<`
+                    if self._read_code(position + 1) == 0x003D:  # `=`
+                        return self._create_token(
+                            TokenKind.LEQ, position, position + 2, "<="
+                        )
+
+                    raise LexerException(
+                        self.source,
+                        Location(self._line, 1 + position - self._line_start),
+                        "Unexpected character, less than operator is not allowed",
+                    )
+                case 0x003E:  # `>`
+                    if self._read_code(position + 1) == 0x003D:  # `=`
+                        return self._create_token(
+                            TokenKind.GEQ, position, position + 2, ">="
+                        )
+
+                    raise LexerException(
+                        self.source,
+                        Location(self._line, 1 + position - self._line_start),
+                        "Unexpected character, greater than operator is not allowed",
+                    )
+                case 0x2264:  # `≤`
+                    return self._create_token(
+                        TokenKind.LEQ, position, position + 1, char
+                    )
+                case 0x2265:  # `≥`
+                    return self._create_token(
+                        TokenKind.GEQ, position, position + 1, char
                     )
 
             # Multi-char tokens:

@@ -16,7 +16,9 @@ class TokenKind(str, Enum):
     PAREN_L = "("
     PAREN_R = ")"
 
-    EQUALS = "="
+    EQ = "="
+    LEQ = "<="
+    GEQ = ">="
 
     COEFFICIENT = "Coefficient"
     VARIABLE = "Variable"
