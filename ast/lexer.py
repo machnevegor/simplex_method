@@ -1,3 +1,5 @@
+from typing import Callable
+
 from .chars import (
     is_coefficient_start,
     is_digit,
@@ -38,18 +40,20 @@ class Lexer:
         self._line_start = 0
 
     def _create_token(self, kind: TokenKind, start: int, end: int, value: str) -> Token:
-        return Token(
-            kind,
-            start,
-            end,
-            self._line,
-            1 + start - self._line_start,
-            value,
-            self._token,
-        )
+        location = Location(self._line, 1 + start - self._line_start)
+
+        return Token(kind, start, end, location, value, self._token)
 
     def _read_code(self, position: int) -> int | None:
         return ord(self.source[position]) if position < len(self.source) else None
+
+    def _read_while(self, start: int, predicate: Callable[[int], bool]) -> int:
+        position = start
+
+        while position < len(self.source) and predicate(self.source[position]):
+            position += 1
+
+        return position
 
     def _read_digits(self, start: int, first_code: int | None) -> int:
         if not is_digit(first_code):  # not <digit>
@@ -59,14 +63,7 @@ class Lexer:
                 f"Unexpected character, expected digit but got: {print_code(first_code)}",
             )
 
-        position = start + 1
-
-        while position < len(self.source) and is_digit(
-            self._read_code(position)
-        ):  # <digit>
-            position += 1
-
-        return position
+        return self._read_while(start + 1, is_digit)
 
     def _read_coefficient(self, start: int, first_code: int) -> Token:
         position, code = start, first_code
@@ -118,12 +115,7 @@ class Lexer:
         )
 
     def _read_variable(self, start: int) -> Token:
-        position = start + 1
-
-        while position < len(self.source) and is_variable_continue(
-            self._read_code(position)
-        ):  # <alpha> | `_` | <digit>
-            position += 1
+        position = self._read_while(start + 1, is_variable_continue)
 
         return self._create_token(
             TokenKind.VARIABLE, start, position, self.source[start:position]
