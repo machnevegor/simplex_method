@@ -25,6 +25,10 @@ def is_variable_start(code: int) -> bool:
     return is_alpha(code) or code == 0x005F  # <alpha> | `_`
 
 
+def is_variable_continue(code: int) -> bool:
+    return is_variable_start(code) or is_digit(code)  # <alpha> | `_` | <digit>
+
+
 def is_printable(code: int) -> bool:
     return 0x0020 <= code <= 0x007E  # <ASCII>
 
@@ -43,6 +47,7 @@ __all__ = (
     "is_upper_alpha",
     "is_alpha",
     "is_variable_start",
+    "is_variable_continue",
     "is_printable",
     "print_code",
 )
