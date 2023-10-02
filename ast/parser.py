@@ -38,9 +38,6 @@ class Lexer:
         self._line = 1
         self._line_start = 0
 
-    def __repr__(self) -> str:
-        return f"Lexer(source={self.source!r})"
-
     def _create_token(self, kind: TokenKind, start: int, end: int, value: str) -> Token:
         return Token(
             kind,
@@ -56,7 +53,7 @@ class Lexer:
         return ord(self.source[position]) if position < len(self.source) else None
 
     def _read_digits(self, start: int, first_code: int | None) -> int:
-        if not is_digit(first_code):  # not <DIGIT>
+        if not is_digit(first_code):  # not <digit>
             raise SyntaxException(
                 self.source,
                 Location(self._line, 1 + start - self._line_start),
@@ -67,7 +64,7 @@ class Lexer:
 
         while position < len(self.source) and is_digit(
             self._read_code(position)
-        ):  # <DIGIT>
+        ):  # <digit>
             position += 1
 
         return position
@@ -80,7 +77,7 @@ class Lexer:
             position += 1
             code = self._read_code(position)
 
-            if is_digit(code):  # <DIGIT>
+            if is_digit(code):  # <digit>
                 raise SyntaxException(
                     self.source,
                     Location(self._line, 1 + position - self._line_start),
@@ -110,7 +107,7 @@ class Lexer:
             position = self._read_digits(position, code)
             code = self._read_code(position)
 
-        if code == 0x002E or is_variable_start(code):  # `.` | <LETTER> | `_`
+        if code == 0x002E or is_variable_start(code):  # `.` | <alpha> | `_`
             raise SyntaxException(
                 self.source,
                 Location(self._line, 1 + position - self._line_start),
@@ -130,9 +127,9 @@ class Lexer:
 
             match code:
                 # Ignored:
-                # - UnicodeBOM
-                # - WhiteSpace
-                # - LineTerminator
+                # - Unicode BOM
+                # - White space
+                # - Line terminator
                 case 0xFEFF | 0x0009 | 0x0020:  # <BOM> | `\t` | <space>
                     position += 1
 
@@ -145,31 +142,28 @@ class Lexer:
 
                     continue
                 case 0x000D:  # `\r`
-                    position += 2 if ord(self.source[position + 1]) == 0x000A else 1
+                    position += (
+                        2 if ord(self.source[position + 1]) == 0x000A else 1
+                    )  # `\r\n` | `\r`
 
                     self._line += 1
                     self._line_start = position
 
                     continue
                 # Single-char tokens:
-                # - ADD
-                # - MUL
-                # - SUB
-                # - DIV
-                # - PAREN_L
-                # - PAREN_R
-                # - EQUALS
+                # - Algebraic operator
+                # - Punctuator
                 case 0x002B | 0x002D | 0x002A | 0x0028 | 0x002F | 0x0029 | 0x003D:  # `+` | `-` | `*` | `(` | `)` | `=`
                     return self._create_token(
                         TokenKind(char), position, position + 1, char
                     )
 
             # Multi-char tokens:
-            # - COEFFICIENT
-            # - VARIABLE
-            if is_coefficient_start(code):  # <DIGIT> | `.`
+            # - Coefficient
+            # - Variable
+            if is_coefficient_start(code):  # <digit> | `.`
                 return self._read_coefficient(position, code)
-            if is_variable_start(code):  # <LETTER> | `_`
+            if is_variable_start(code):  # <alpha> | `_`
                 return ...
 
             raise SyntaxException(
