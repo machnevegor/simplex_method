@@ -1,7 +1,6 @@
 """This module contains the Lexer class, which is responsible for
 converting a source string into a stream of tokens.
 """
-
 from typing import Callable
 
 from .chars import (
