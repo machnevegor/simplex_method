@@ -1,6 +1,5 @@
-"""This module contains the Lexer class, which is responsible for
-converting a source string into a stream of tokens.
-"""
+from __future__ import annotations
+
 from typing import Callable
 
 from .chars import (
@@ -105,8 +104,8 @@ class Lexer:
         Args:
             start (int): The index of the first character of the token.
             predicate (Callable[[int], bool]): A function that takes a
-                character code and returns whether or not it satisfies
-                the predicate.
+                character code and returns whether it satisfies the
+                predicate.
 
         Returns:
             int: The index of the first character after the sequence.
@@ -194,7 +193,6 @@ class Lexer:
                 code = self._read_code(position)
 
             position = self._read_digits(position, code)
-            code = self._read_code(position)
 
         return self._create_token(
             TokenKind.COEFFICIENT, start, position, self.source[start:position]

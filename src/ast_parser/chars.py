@@ -1,6 +1,3 @@
-"""This module contains functions to check if a code is a character of
-a specific kind.
-"""
 from .token import TokenKind
 
 
