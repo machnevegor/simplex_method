@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from typing import Callable
 
-from src.ast_parser.chars import (
+from ast_parser.chars import (
     is_coefficient_start,
     is_digit,
     is_variable_continue,
     is_variable_start,
     print_char_code,
 )
-from src.ast_parser.errors import LexerException
-from src.ast_parser.token import Location, Token, TokenKind
+from ast_parser.errors import LexerException
+from ast_parser.token import Location, Token, TokenKind
 
 
 class Lexer:
@@ -81,6 +81,25 @@ class Lexer:
         self._token = next_token
 
         return self._token
+
+    def tokenize(self) -> list[Token]:
+        """Gets the Tokens from the source.
+
+        Raises:
+            LexerException: Unexpected character, less than operator is
+                not allowed.
+            LexerException: Unexpected character, greater than operator
+                is not allowed.
+            LexerException: Invalid character: <code>.
+            LexerException: Invalid coefficient, unexpected digit after
+                0: <code>.
+            LexerException: Invalid coefficient, expected digit but
+                got: <code>.
+
+        Returns:
+            list[Token]: The tokens from the source.
+        """
+        return list(self)
 
     def _create_token(self, kind: TokenKind, start: int, end: int, value: str) -> Token:
         """Creates a token with the given parameters.

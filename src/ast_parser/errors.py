@@ -1,4 +1,4 @@
-from src.ast_parser.token import Location
+from ast_parser.token import Location
 
 
 class PositionedException(Exception):

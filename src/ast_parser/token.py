@@ -94,7 +94,7 @@ def is_relational_operator(token: Token) -> bool:
         bool: True if the Token is a relational operator, False
             otherwise.
     """
-    return token.kind in (TokenKind.ADD, TokenKind.SUB)
+    return token.kind in (TokenKind.EQ, TokenKind.LEQ, TokenKind.GEQ)
 
 
 __all__ = (

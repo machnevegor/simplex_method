@@ -1,4 +1,4 @@
-from src.ast_parser.token import TokenKind
+from ast_parser.token import TokenKind
 
 
 def is_digit(code: int) -> bool:
