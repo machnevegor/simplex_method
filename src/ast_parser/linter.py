@@ -1,5 +1,5 @@
-from src.ast_parser.errors import LinterException
-from src.ast_parser.token import (
+from ast_parser.errors import LinterException
+from ast_parser.token import (
     Token,
     TokenKind,
     is_binary_operator,
@@ -50,6 +50,8 @@ def lint(token: Token, source: str) -> None:
             variable_provided = False
 
         if is_relational_operator(cursor):
+            # <nothing> <relational operator> <nothing> ???
+
             if relation_provided:
                 raise LinterException(
                     source,
@@ -58,6 +60,8 @@ def lint(token: Token, source: str) -> None:
                 )
 
             relation_provided = True
+
+        # <term> <binary operator> <relational operator> ???
 
         if cursor.kind == TokenKind.VARIABLE:
             if variable_provided:
@@ -80,12 +84,6 @@ def lint(token: Token, source: str) -> None:
                 raise LinterException(
                     source, cursor.location, "Unexpected comma, equation missed"
                 )
-            if token.next_token is None:
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected comma at the end of the equation",
-                )
 
             if not relation_provided:
                 raise LinterException(
@@ -104,6 +102,7 @@ def lint(token: Token, source: str) -> None:
             token.location,
             "Equation must contain a relational operator",
         )
+    # comma at the end of the equation ???
 
 
 __all__ = ("lint",)
