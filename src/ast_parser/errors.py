@@ -2,7 +2,7 @@ from src.ast_parser.token import Location
 
 
 class PositionedException(Exception):
-    """Base class for exceptions with location.
+    """Base class for exceptions with Location.
 
     Args:
         source (str): The source string being tokenized.
