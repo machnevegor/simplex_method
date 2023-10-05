@@ -31,6 +31,9 @@ class TokenKind(str, Enum):
     VARIABLE = "Variable"
     """Variable name."""
 
+    COMMA = ","
+    """Comma."""
+
 
 @dataclass
 class Location:
@@ -52,9 +55,9 @@ class Token:
     kind: TokenKind
     """Kind of the token."""
 
-    start: int
+    start: int = field(repr=False)
     """The index of the first character of the token."""
-    end: int
+    end: int = field(repr=False)
     """The index of the first character after the token."""
     location: Location
     """The Location of the token in the source."""
@@ -68,4 +71,36 @@ class Token:
     """The next Token in the source."""
 
 
-__all__ = ("TokenKind", "Location", "Token")
+def is_binary_operator(token: Token) -> bool:
+    """Check if the Token is an algebraic binary operator.
+
+    Args:
+        token (Token): The Token to check.
+
+    Returns:
+        bool: True if the Token is an algebraic binary operator, False
+            otherwise.
+    """
+    return token.kind in (TokenKind.ADD, TokenKind.SUB)
+
+
+def is_relational_operator(token: Token) -> bool:
+    """Check if the Token is a relational operator.
+
+    Args:
+        token (Token): The Token to check.
+
+    Returns:
+        bool: True if the Token is a relational operator, False
+            otherwise.
+    """
+    return token.kind in (TokenKind.ADD, TokenKind.SUB)
+
+
+__all__ = (
+    "TokenKind",
+    "Location",
+    "Token",
+    "is_binary_operator",
+    "is_relational_operator",
+)

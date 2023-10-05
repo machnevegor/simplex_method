@@ -1,4 +1,4 @@
-from .token import TokenKind
+from src.ast_parser.token import TokenKind
 
 
 def is_digit(code: int) -> bool:
@@ -103,8 +103,8 @@ def is_ascii(code: int) -> bool:
     return 0x0020 <= code <= 0x007E  # <ASCII>
 
 
-def print_code(code: int | None) -> str:
-    """Print code as a character or a Unicode code point.
+def print_char_code(code: int | None) -> str:
+    """Describe code as a character or Unicode code point.
 
     Args:
         code (int | None): Unicode code point. None for EOF.
@@ -127,5 +127,5 @@ __all__ = (
     "is_variable_start",
     "is_variable_continue",
     "is_ascii",
-    "print_code",
+    "print_char_code",
 )

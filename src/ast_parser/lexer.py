@@ -1,42 +1,21 @@
+from __future__ import annotations
+
 from typing import Callable
 
-from .chars import (
+from src.ast_parser.chars import (
     is_coefficient_start,
     is_digit,
     is_variable_continue,
     is_variable_start,
-    print_code,
+    print_char_code,
 )
-from .token import Location, Token, TokenKind
-
-
-class LexerException(Exception):
-    """A LexerException is raised when the Lexer encounters an invalid
-    character or token.
-
-    Args:
-        source (str): The source string being tokenized.
-        location (Location): The location of the invalid character or token.
-        description (str | None): An optional description of the error.
-    """
-
-    source: str
-    """The source string being tokenized."""
-    location: Location
-    """The location of the invalid character or token."""
-
-    def __init__(
-            self, source: str, location: Location, description: str | None = None
-    ) -> None:
-        super().__init__(description)
-
-        self.source = source
-        self.location = location
+from src.ast_parser.errors import LexerException
+from src.ast_parser.token import Location, Token, TokenKind
 
 
 class Lexer:
     """A Lexer is a stateful stream generator in that every time it is
-    advanced, it returns the next token in the Source.
+    advanced, it returns the next token in the source.
 
     Assuming the source lexes, the final Token emitted by the Lexer
     will be of kind EOF, after which the Lexer will repeatedly return
@@ -50,7 +29,7 @@ class Lexer:
     """The source string being tokenized."""
 
     _token: Token
-    """The currently active token."""
+    """The currently active Token."""
 
     _line: int
     """The current line number."""
@@ -64,6 +43,44 @@ class Lexer:
 
         self._line = 1
         self._line_start = 0
+
+    def __iter__(self) -> Lexer:
+        """Gets an iterator over the tokens in the source.
+
+        Returns:
+            Lexer: An iterator over the tokens in the source.
+        """
+        return self
+
+    def __next__(self) -> Token:
+        """Gets the next token from the source.
+
+        Raises:
+            StopIteration: The end of the source has been reached.
+            LexerException: Unexpected character, less than operator is
+                not allowed.
+            LexerException: Unexpected character, greater than operator
+                is not allowed.
+            LexerException: Invalid character: <code>.
+            LexerException: Invalid coefficient, unexpected digit after
+                0: <code>.
+            LexerException: Invalid coefficient, expected digit but
+                got: <code>.
+
+        Returns:
+            Token: The next token from the source.
+        """
+        next_token = self._next_token()
+
+        if next_token.kind == TokenKind.EOF:
+            raise StopIteration
+
+        self._token.next_token = next_token
+        next_token.prev_token = self._token
+
+        self._token = next_token
+
+        return self._token
 
     def _create_token(self, kind: TokenKind, start: int, end: int, value: str) -> Token:
         """Creates a token with the given parameters.
@@ -135,7 +152,7 @@ class Lexer:
             raise LexerException(
                 self.source,
                 Location(self._line, 1 + start - self._line_start),
-                f"Unexpected character, expected digit but got: {print_code(first_code)}",
+                f"Unexpected character, expected digit but got: {print_char_code(first_code)}",
             )
 
         return self._read_while(start + 1, is_digit)
@@ -158,7 +175,7 @@ class Lexer:
         """
         position, code = start, first_code
 
-        # Leftmost digits:
+        # Leftmost digits.
         if code == 0x0030:  # `0`
             position += 1
             code = self._read_code(position)
@@ -167,13 +184,13 @@ class Lexer:
                 raise LexerException(
                     self.source,
                     Location(self._line, 1 + position - self._line_start),
-                    f"Invalid coefficient, unexpected digit after 0: {print_code(code)}",
+                    f"Invalid coefficient, unexpected digit after 0: {print_char_code(code)}",
                 )
         elif code != 0x002E:  # not `.`
             position = self._read_digits(position, code)
             code = self._read_code(position)
 
-        # Rightmost digits:
+        # Rightmost digits.
         if code == 0x002E:  # `.`
             position += 1
             code = self._read_code(position)
@@ -181,7 +198,7 @@ class Lexer:
             position += self._read_digits(position, code)
             code = self._read_code(position)
 
-        # Exponent:
+        # Exponent.
         if code in (0x0045, 0x0065):  # `E` | `e`
             position += 1
             code = self._read_code(position)
@@ -242,9 +259,9 @@ class Lexer:
 
             match code:
                 # Ignored:
-                # - Unicode BOM
-                # - White space
-                # - Line terminator
+                # - unicode BOM;
+                # - white space;
+                # - line terminator.
                 case 0xFEFF | 0x0009 | 0x0020:  # <BOM> | `\t` | <space>
                     position += 1
 
@@ -266,9 +283,10 @@ class Lexer:
 
                     continue
                 # Single-char tokens:
-                # - Binary plus and minus operators
-                # - Multiplication operator
-                # - Relational operators
+                # - binary plus and minus operators;
+                # - multiplication operator;
+                # - relational operators;
+                # - comma.
                 case 0x002B | 0x002D | 0x002A:  # `+` | `-` | `*`
                     return self._create_token(
                         TokenKind(char), position, position + 1, char
@@ -312,10 +330,14 @@ class Lexer:
                     return self._create_token(
                         TokenKind.GEQ, position, position + 1, char
                     )
+                case 0x002C:  # `,`
+                    return self._create_token(
+                        TokenKind.COMMA, position, position + 1, char
+                    )
 
             # Multi-char tokens:
-            # - Coefficient
-            # - Variable
+            # - coefficient;
+            # - variable.
             if is_coefficient_start(code):  # <digit> | `.`
                 return self._read_coefficient(position, code)
             if is_variable_start(code):  # <alpha> | `_`
@@ -324,10 +346,10 @@ class Lexer:
             raise LexerException(
                 self.source,
                 Location(self._line, 1 + position - self._line_start),
-                f"Invalid character: {print_code(code)}",
+                f"Invalid character: {print_char_code(code)}",
             )
 
         return self._create_token(TokenKind.EOF, position, position, "")
 
 
-__all__ = ("LexerException", "Lexer")
+__all__ = ("Lexer",)
