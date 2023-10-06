@@ -70,17 +70,30 @@ class Lexer:
         Returns:
             Token: The next token from the source.
         """
+        last_token = self._token
         next_token = self._next_token()
 
-        if next_token.kind == TokenKind.EOF:
-            raise StopIteration
+        if last_token.kind == TokenKind.EOF and next_token.kind == TokenKind.EOF:
+            if last_token.prev_token is None:
+                raise LexerException(
+                    self.source,
+                    last_token.location,
+                    "Crude modification of the token chain is detected",
+                )
+
+            if last_token.prev_token.kind == TokenKind.EOF:
+                raise StopIteration
+
+            self._token = next_token
+
+            return last_token
 
         self._token.next_token = next_token
         next_token.prev_token = self._token
 
         self._token = next_token
 
-        return self._token
+        return last_token
 
     def tokenize(self) -> list[Token]:
         """Gets the Tokens from the source.
