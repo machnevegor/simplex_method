@@ -1,4 +1,4 @@
-from ast_parser import Lexer, lint
+from ast_parser import Lexer, LinterException, lint
 
 lexer = Lexer(
     """                            5 x_1
@@ -13,4 +13,7 @@ tokens = lexer.tokenize()
 for token in tokens:
     print(token, "\n")
 
-lint(tokens[0], lexer.source)
+try:
+    lint(tokens[0], lexer.source)
+except LinterException as e:
+    print("ERROR", e.location, e.args[0])
