@@ -44,6 +44,15 @@ class Lexer:
         self._line = 1
         self._line_start = 0
 
+    @property
+    def token(self) -> Token:
+        """Gets the currently active Token.
+
+        Returns:
+            Token: The currently active Token.
+        """
+        return self._token
+
     def __iter__(self) -> Lexer:
         """Gets an iterator over the tokens in the source.
 
@@ -94,25 +103,6 @@ class Lexer:
         self._token = next_token
 
         return last_token
-
-    def tokenize(self) -> list[Token]:
-        """Gets the Tokens from the source.
-
-        Raises:
-            LexerException: Unexpected character, less than operator is
-                not allowed.
-            LexerException: Unexpected character, greater than operator
-                is not allowed.
-            LexerException: Invalid character: <code>.
-            LexerException: Invalid coefficient, unexpected digit after
-                0: <code>.
-            LexerException: Invalid coefficient, expected digit but
-                got: <code>.
-
-        Returns:
-            list[Token]: The tokens from the source.
-        """
-        return list(self)
 
     def _create_token(self, kind: TokenKind, start: int, end: int, value: str) -> Token:
         """Creates a token with the given parameters.
