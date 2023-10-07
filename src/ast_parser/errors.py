@@ -49,4 +49,21 @@ class LinterException(PositionedException):
     """
 
 
-__all__ = ("PositionedException", "LexerException", "LinterException")
+class ParserException(PositionedException):
+    """A ParserException is raised when the Parser encounters an
+    unexpected token or token chain.
+
+    Args:
+        source (str): The source string being tokenized.
+        location (Location): The Location of the exception.
+        description (str, optional): An optional description of the
+            error.
+    """
+
+
+__all__ = (
+    "PositionedException",
+    "LexerException",
+    "LinterException",
+    "ParserException",
+)
