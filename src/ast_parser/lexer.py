@@ -53,15 +53,6 @@ class Lexer:
         """
         return self._source
 
-    @property
-    def token(self) -> Token:
-        """Gets the currently active Token.
-
-        Returns:
-            Token: The currently active Token.
-        """
-        return self._token
-
     def __iter__(self) -> Lexer:
         """Gets an iterator over the tokens in the source.
 

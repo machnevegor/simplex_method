@@ -81,6 +81,7 @@ class Linter:
             self._lint_comma(token)
 
             self._variable_provided = False
+            self._relation_provided = False
 
     def _lint_eof(self, token: Token) -> None:
         """Lint the EOF Token.

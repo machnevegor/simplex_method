@@ -1,25 +1,12 @@
-from ast_parser import Lexer, LinterException, lint
-from algorithm import solver
+from ast_parser.parser import Parser
 
-lexer = Lexer(
+parser = Parser(
     """                            5 x_1
 
-+ 3x_2 - 4 * _y3  2          - 8 XXXX_7
++ 3x_2 - 4 * _y3  2          - 8 XXXX_7  - 4 * _y3  2
 
-      ≤ 19 * .5"""
+      ≤ 19 * 5, 5 <= 3"""
 )
 
-
-tokens = lexer.tokenize()
-
-for token in tokens:
-    print(token, "\n")
-
-try:
-    lint(tokens[0], lexer.source)
-except LinterException as e:
-    print("ERROR", e.location, e.args[0])
-
-
-solver.Solver()
-
+for equation in parser.parse():
+    print(equation, "\n")
