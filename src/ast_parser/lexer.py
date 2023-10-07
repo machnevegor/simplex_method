@@ -25,7 +25,7 @@ class Lexer:
         source (str): The source string being tokenized.
     """
 
-    source: str
+    _source: str
     """The source string being tokenized."""
 
     _token: Token
@@ -37,12 +37,21 @@ class Lexer:
     """The index of the start of the current line."""
 
     def __init__(self, source: str) -> None:
-        self.source = source
+        self._source = source
 
         self._token = Token(TokenKind.SOF, 0, 0, Location(0, 0), "")
 
         self._line = 1
         self._line_start = 0
+
+    @property
+    def source(self) -> str:
+        """Gets the source string being tokenized.
+
+        Returns:
+            str: The source string being tokenized.
+        """
+        return self._source
 
     @property
     def token(self) -> Token:
@@ -85,7 +94,7 @@ class Lexer:
         if last_token.kind == TokenKind.EOF and next_token.kind == TokenKind.EOF:
             if last_token.prev_token is None:
                 raise LexerException(
-                    self.source,
+                    self._source,
                     last_token.location,
                     "Crude modification of the token chain is detected",
                 )
@@ -132,7 +141,7 @@ class Lexer:
             int | None: The character code at the given position, or
                 None if the position is out of bounds.
         """
-        return ord(self.source[position]) if position < len(self.source) else None
+        return ord(self._source[position]) if position < len(self._source) else None
 
     def _read_while(self, start: int, predicate: Callable[[int], bool]) -> int:
         """Reads a sequence of characters from the source starting at
@@ -149,7 +158,7 @@ class Lexer:
         """
         position = start
 
-        while position < len(self.source) and predicate(ord(self.source[position])):
+        while position < len(self._source) and predicate(ord(self._source[position])):
             position += 1
 
         return position
@@ -172,7 +181,7 @@ class Lexer:
         """
         if not is_digit(first_code):  # not <digit>
             raise LexerException(
-                self.source,
+                self._source,
                 Location(self._line, 1 + start - self._line_start),
                 f"Unexpected character, expected digit but got: {print_char_code(first_code)}",
             )
@@ -204,7 +213,7 @@ class Lexer:
 
             if is_digit(code):  # <digit>
                 raise LexerException(
-                    self.source,
+                    self._source,
                     Location(self._line, 1 + position - self._line_start),
                     f"Invalid coefficient, unexpected digit after 0: {print_char_code(code)}",
                 )
@@ -232,7 +241,7 @@ class Lexer:
             position = self._read_digits(position, code)
 
         return self._create_token(
-            TokenKind.COEFFICIENT, start, position, self.source[start:position]
+            TokenKind.COEFFICIENT, start, position, self._source[start:position]
         )
 
     def _read_variable(self, start: int) -> Token:
@@ -248,7 +257,7 @@ class Lexer:
         position = self._read_while(start + 1, is_variable_continue)
 
         return self._create_token(
-            TokenKind.VARIABLE, start, position, self.source[start:position]
+            TokenKind.VARIABLE, start, position, self._source[start:position]
         )
 
     def _next_token(self) -> Token:
@@ -275,8 +284,8 @@ class Lexer:
         """
         position = self._token.end
 
-        while position < len(self.source):
-            char = self.source[position]
+        while position < len(self._source):
+            char = self._source[position]
             code = ord(char)
 
             match code:
@@ -329,7 +338,7 @@ class Lexer:
                         )
 
                     raise LexerException(
-                        self.source,
+                        self._source,
                         Location(self._line, 1 + position - self._line_start),
                         "Unexpected character, less than operator is not allowed",
                     )
@@ -340,7 +349,7 @@ class Lexer:
                         )
 
                     raise LexerException(
-                        self.source,
+                        self._source,
                         Location(self._line, 1 + position - self._line_start),
                         "Unexpected character, greater than operator is not allowed",
                     )
@@ -366,7 +375,7 @@ class Lexer:
                 return self._read_variable(position)
 
             raise LexerException(
-                self.source,
+                self._source,
                 Location(self._line, 1 + position - self._line_start),
                 f"Invalid character: {print_char_code(code)}",
             )
