@@ -1,4 +1,5 @@
 from ast_parser import Lexer, LinterException, lint
+from algorithm import solver
 
 lexer = Lexer(
     """                            5 x_1
@@ -7,6 +8,7 @@ lexer = Lexer(
 
       ≤ 19 * .5"""
 )
+
 
 tokens = lexer.tokenize()
 
@@ -17,3 +19,7 @@ try:
     lint(tokens[0], lexer.source)
 except LinterException as e:
     print("ERROR", e.location, e.args[0])
+
+
+solver.Solver()
+

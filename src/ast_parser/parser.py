@@ -8,7 +8,8 @@ from ast_parser.token import TokenKind
 class Constraint:
     """Constraint of the LP problem."""
 
-    kind: TokenKind.EQ | TokenKind.LEQ | TokenKind.GEQ
+    #kind: TokenKind.EQ | TokenKind.LEQ | TokenKind.GEQ
+    kind : TokenKind.EQ
     """Kind of the constraint."""
     variables: dict[str, float]
     """Basic variables of the constraint. Name -> coefficient."""
