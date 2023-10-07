@@ -5,7 +5,7 @@ parser = Parser(
 
 + 3x_2 - 4 * _y3  2          - 8 XXXX_7  - 4 * _y3  2
 
-      ≤ 19 * 5, 5 <= 3"""
+      ≤ 19 * 5, 5 <= - 3 * x"""
 )
 
 for equation in parser.parse():

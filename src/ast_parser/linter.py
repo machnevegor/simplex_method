@@ -111,6 +111,12 @@ class Linter:
                 token.prev_token.location,
                 "Unexpected binary operator at the end of the equation",
             )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected EOF, multiplier missed",
+            )
         if is_relational_operator(token.prev_token):
             raise LinterException(
                 self._source,
@@ -139,6 +145,12 @@ class Linter:
                 token.location,
                 "Unexpected binary operator, term missed",
             )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected binary operator, multiplier missed",
+            )
 
     def _lint_multiplication_operator(self, token: Token) -> None:
         """Lint the multiplication operator Token.
@@ -150,11 +162,21 @@ class Linter:
             LinterException: Unexpected multiplication operator, term
                 missed.
         """
-        if token.prev_token.kind == TokenKind.MUL:
+        if (
+            is_binary_operator(token.prev_token)
+            or is_relational_operator(token.prev_token)
+            or token.prev_token.kind == TokenKind.COMMA
+        ):
             raise LinterException(
                 self._source,
                 token.location,
                 "Unexpected multiplication operator, term missed",
+            )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected multiplication operator, multiplier missed",
             )
 
     def _lint_relational_operator(self, token: Token) -> None:
@@ -170,6 +192,12 @@ class Linter:
             LinterException: Unexpected relational operator, left side
                 of the equation is missed.
         """
+        if token.prev_token.kind in (TokenKind.SOF, TokenKind.COMMA):
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected relational operator, left side of the equation is missed",
+            )
         if self._relation_provided:
             raise LinterException(
                 self._source,
@@ -182,11 +210,11 @@ class Linter:
                 token.location,
                 "Unexpected binary operator, term missed",
             )
-        if token.prev_token.kind in (TokenKind.SOF, TokenKind.COMMA):
+        if token.prev_token.kind == TokenKind.MUL:
             raise LinterException(
                 self._source,
                 token.location,
-                "Unexpected relational operator, left side of the equation is missed",
+                "Unexpected relational operator, multiplier missed",
             )
 
     def _lint_variable(self, token: Token) -> None:
@@ -236,6 +264,12 @@ class Linter:
                 self._source,
                 token.prev_token,
                 "Unexpected binary operator at the end of the equation",
+            )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected comma, multiplier missed",
             )
         if is_relational_operator(token.prev_token):
             raise LinterException(
