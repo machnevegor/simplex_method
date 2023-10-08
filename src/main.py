@@ -1,15 +1,6 @@
-from ast_parser.parser import Parser
-
-# parser = Parser(
-#     """                            5 x_1
-
-# + 3x_2 - 4 * _y3  2          - 8 XXXX_7  - 4 * _y3  2
-
-#       ≤ 19 * 5, 5 <= - 3 * x"""
-# )
+from ast_parser.parser import Parser, EquationKind
 
 parser = Parser(
-    #Tatar Paint Optimization Problem constraints
     """
         6x_1 + 4x_2 <= 24,
 
@@ -23,5 +14,39 @@ parser = Parser(
     """
 )
 
-for equation in parser:
-    print(equation)
+equations = tuple(parser)
+
+demand: dict[str, list[int]] = {}
+for i, equation in enumerate(equations):
+    for variable, coefficient in equation.variables.items():
+        if coefficient == 0.0:
+            continue
+
+        if variable not in demand:
+            demand[variable] = []
+
+        demand[variable].append(i)
+
+objective_variables = tuple(
+    filter(lambda variable: len(demand[variable]) == 1, demand.keys())
+)
+
+objective_functions = tuple(
+    filter(
+        lambda function: function.kind == EquationKind.EQ,
+        map(lambda variable: equations[demand[variable][0]], objective_variables),
+    )
+)
+
+if len(objective_variables) != len(objective_functions):
+    raise ValueError("Objective functions must be equalities")
+
+constraints = tuple(
+    filter(
+        lambda function: function not in objective_functions,
+        equations,
+    )
+)
+
+print("Objective functions: ", objective_functions, "\n")
+print("Constraints: ", constraints)
