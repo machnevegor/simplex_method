@@ -17,6 +17,15 @@ parser = Parser(
 equations = tuple(parser)
 
 for equation in equations:
+    if equation.kind == EquationKind.GEQ and equation.bound < 0.0:
+        for variable, coefficient in equation.variables.items():
+            equation.variables[variable] *= -1.0
+
+        equation.bound *= -1.0
+        equation.kind = EquationKind.LEQ
+        
+        continue
+
     if equation.kind == EquationKind.GEQ:
         raise ValueError("Equation kind must be either EQ or LEQ")
     if equation.bound < 0.0:
