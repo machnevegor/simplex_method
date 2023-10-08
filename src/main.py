@@ -16,6 +16,12 @@ parser = Parser(
 
 equations = tuple(parser)
 
+for equation in equations:
+    if equation.kind == EquationKind.GEQ:
+        raise ValueError("Equation kind must be either EQ or LEQ")
+    if equation.bound < 0.0:
+        raise ValueError("Equation bound must be non-negative")
+
 demand: dict[str, list[int]] = {}
 for i, equation in enumerate(equations):
     for variable, coefficient in equation.variables.items():
