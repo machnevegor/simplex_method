@@ -7,172 +7,282 @@ from ast_parser.token import (
 )
 
 
-def is_chain_intact(token: Token) -> bool:
-    """Check if the token chain is safe in the specific region.
+class Linter:
+    """Linter enables real-time validation of the token chain.
 
     Args:
-        token (Token): The token to check.
-
-    Returns:
-        bool: True if the token chain is safe, False otherwise.
+        source (str): The source string being tokenized.
     """
-    if token.kind != TokenKind.SOF and (
-        token.prev_token is None or token.prev_token.next_token is not token
-    ):
-        return False
-    if token.kind != TokenKind.EOF and (
-        token.next_token is None or token.next_token.prev_token is not token
-    ):
-        return False
 
-    return True
+    _source: str
 
+    _variable_provided: bool
+    _relation_provided: bool
 
-def lint(token: Token, source: str) -> None:
-    """Lint the obtained tokens step by step.
+    def __init__(self, source: str) -> None:
+        self._source = source
 
-    Since the tokens must form a chain, hence the Lexer must fully
-    tokenize the source before linting.
+        self._variable_provided = False
+        self._relation_provided = False
 
-    Args:
-        token (Token): The starting token.
-        source (str): The source string being tokenized. Used for
-            exception messages.
+    def lint(self, token: Token) -> None:
+        """The lint method checks the token for integrity, validity and
+        relevance. It raises a LinterException if the token is invalid
+        or unexpected.
 
-    Raises:
-        LinterException: Unexpected binary operator, term missed.
-        LinterException: Equation must contain only one relational
-            operator.
-        LinterException: Term must contain no more than one variable.
-        LinterException: Unexpected comma at the beginning of the
-            equation.
-        LinterException: Unexpected comma, equation missed.
-        LinterException: Unexpected comma at the end of the equation.
-        LinterException: Equation must contain a relational operator.
-    """
-    cursor: Token | None = token
+        Args:
+            token (Token): The starting token.
+            source (str): The source string being tokenized. Used for
+                exception messages.
 
-    # Linting states.
-    variable_provided = False
-    relation_provided = False
-
-    while cursor is not None:
-        if not is_chain_intact(cursor):
+        Raises:
+            LinterException: Unexpected binary operator, term missed.
+            LinterException: Equation must contain only one relational
+                operator.
+            LinterException: Term must contain no more than one variable.
+            LinterException: Unexpected comma at the beginning of the
+                equation.
+            LinterException: Unexpected comma, equation missed.
+            LinterException: Unexpected comma at the end of the equation.
+            LinterException: Equation must contain a relational operator.
+        """
+        if token.kind != TokenKind.SOF and (
+            token.prev_token is None or token.prev_token.next_token is not token
+        ):
             raise LinterException(
-                source,
-                cursor.location,
+                self._source,
+                token.location,
                 "Crude modification of the token chain is detected",
             )
 
-        if cursor.kind == TokenKind.EOF:
-            if cursor.prev_token.kind != TokenKind.SOF and not relation_provided:
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Equation must contain a relational operator",
-                )
-            if is_binary_operator(cursor.prev_token):
-                raise LinterException(
-                    source,
-                    cursor.prev_token.location,
-                    "Unexpected binary operator at the end of the equation",
-                )
-            if is_relational_operator(cursor.prev_token):
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected EOF, right side of the equation is missed",
-                )
-            if cursor.prev_token.kind == TokenKind.COMMA:
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected comma at the end of the equation",
-                )
+        if token.kind == TokenKind.EOF:
+            self._lint_eof(token)
 
-        if is_binary_operator(cursor):
-            if is_binary_operator(cursor.prev_token):
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected binary operator, term missed",
-                )
+        if is_binary_operator(token):
+            self._lint_binary_operator(token)
 
-            variable_provided = False
+            self._variable_provided = False
 
-        if cursor.kind == TokenKind.MUL and cursor.prev_token.kind == TokenKind.MUL:
+        if token.kind == TokenKind.MUL:
+            self._lint_multiplication_operator(token)
+
+        if is_relational_operator(token):
+            self._lint_relational_operator(token)
+
+            self._variable_provided = False
+            self._relation_provided = True
+
+        if token.kind == TokenKind.VARIABLE:
+            self._lint_variable(token)
+
+            self._variable_provided = True
+
+        if token.kind == TokenKind.COMMA:
+            self._lint_comma(token)
+
+            self._variable_provided = False
+            self._relation_provided = False
+
+    def _lint_eof(self, token: Token) -> None:
+        """Lint the EOF Token.
+
+        Args:
+            token (Token): The EOF Token.
+
+        Raises:
+            LinterException: Equation must contain a relational
+                operator.
+            LinterException: Unexpected binary operator at the end of
+                the equation.
+            LinterException: Unexpected EOF, right side of the equation
+                is missed.
+            LinterException: Unexpected comma at the end of the
+                equation.
+        """
+        if token.prev_token.kind != TokenKind.SOF and not self._relation_provided:
             raise LinterException(
-                source,
-                cursor.location,
-                "Unexpected multiplication operator, term missed",
+                self._source,
+                token.location,
+                "Equation must contain a relational operator",
+            )
+        if is_binary_operator(token.prev_token):
+            raise LinterException(
+                self._source,
+                token.prev_token.location,
+                "Unexpected binary operator at the end of the equation",
+            )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected EOF, multiplier missed",
+            )
+        if is_relational_operator(token.prev_token):
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected EOF, right side of the equation is missed",
+            )
+        if token.prev_token.kind == TokenKind.COMMA:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected comma at the end of the equation",
             )
 
-        if is_relational_operator(cursor):
-            if relation_provided:
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Equation must contain only one relational operator",
-                )
-            if is_binary_operator(cursor.prev_token):
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected binary operator, term missed",
-                )
-            if cursor.prev_token.kind in (TokenKind.SOF, TokenKind.COMMA):
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected relational operator, left side of the equation is missed",
-                )
+    def _lint_binary_operator(self, token: Token) -> None:
+        """Lint the binary operator Token.
 
-            variable_provided = False
-            relation_provided = True
+        Args:
+            token (Token): The binary operator Token.
 
-        if cursor.kind == TokenKind.VARIABLE:
-            if variable_provided:
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Term must contain no more than one variable",
-                )
+        Raises:
+            LinterException: Unexpected binary operator, term missed.
+        """
+        if is_binary_operator(token.prev_token):
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected binary operator, term missed",
+            )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected binary operator, multiplier missed",
+            )
 
-            variable_provided = True
+    def _lint_multiplication_operator(self, token: Token) -> None:
+        """Lint the multiplication operator Token.
 
-        if cursor.kind == TokenKind.COMMA:
-            if cursor.prev_token.kind == TokenKind.SOF:
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected comma at the beginning of the equation",
-                )
-            if not relation_provided:
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Equation must contain a relational operator",
-                )
-            if is_binary_operator(cursor.prev_token):
-                raise LinterException(
-                    source,
-                    cursor.prev_token,
-                    "Unexpected binary operator at the end of the equation",
-                )
-            if is_relational_operator(cursor.prev_token):
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected comma, right side of the equation is missed",
-                )
-            if cursor.prev_token.kind == TokenKind.COMMA:
-                raise LinterException(
-                    source,
-                    cursor.location,
-                    "Unexpected comma, equation missed",
-                )
+        Args:
+            token (Token): The multiplication operator Token.
 
-        cursor = cursor.next_token
+        Raises:
+            LinterException: Unexpected multiplication operator, term
+                missed.
+        """
+        if (
+            is_binary_operator(token.prev_token)
+            or is_relational_operator(token.prev_token)
+            or token.prev_token.kind == TokenKind.COMMA
+        ):
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected multiplication operator, term missed",
+            )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected multiplication operator, multiplier missed",
+            )
+
+    def _lint_relational_operator(self, token: Token) -> None:
+        """Lint the relational operator Token.
+
+        Args:
+            token (Token): The relational operator Token.
+
+        Raises:
+            LinterException: Equation must contain only one relational
+                operator.
+            LinterException: Unexpected binary operator, term missed.
+            LinterException: Unexpected relational operator, left side
+                of the equation is missed.
+        """
+        if token.prev_token.kind in (TokenKind.SOF, TokenKind.COMMA):
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected relational operator, left side of the equation is missed",
+            )
+        if self._relation_provided:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Equation must contain only one relational operator",
+            )
+        if is_binary_operator(token.prev_token):
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected binary operator, term missed",
+            )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected relational operator, multiplier missed",
+            )
+
+    def _lint_variable(self, token: Token) -> None:
+        """Lint the variable Token.
+
+        Args:
+            token (Token): The variable Token.
+
+        Raises:
+            LinterException: Term must contain no more than one
+                variable.
+        """
+        if self._variable_provided:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Term must contain no more than one variable",
+            )
+
+    def _lint_comma(self, token: Token) -> None:
+        """Lint the comma Token.
+
+        Args:
+            token (Token): The comma Token.
+
+        Raises:
+            LinterException: Unexpected comma at the beginning of the
+                equation.
+            LinterException: Unexpected comma, equation missed.
+            LinterException: Unexpected comma at the end of the
+                equation.
+        """
+        if token.prev_token.kind == TokenKind.SOF:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected comma at the beginning of the equation",
+            )
+        if not self._relation_provided:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Equation must contain a relational operator",
+            )
+        if is_binary_operator(token.prev_token):
+            raise LinterException(
+                self._source,
+                token.prev_token,
+                "Unexpected binary operator at the end of the equation",
+            )
+        if token.prev_token.kind == TokenKind.MUL:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected comma, multiplier missed",
+            )
+        if is_relational_operator(token.prev_token):
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected comma, right side of the equation is missed",
+            )
+        if token.prev_token.kind == TokenKind.COMMA:
+            raise LinterException(
+                self._source,
+                token.location,
+                "Unexpected comma, equation missed",
+            )
 
 
-__all__ = ("lint",)
+__all__ = ("Linter",)
