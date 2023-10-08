@@ -92,8 +92,8 @@ class Parser:
     def __next__(self) -> Equation:
         """Gets the next Equation in the source.
 
-        Accumulation, processing and validation of Equations in real
-        time. The source is parsed sequentially, token by token.
+        Accumulation, processing and validation of Equations in
+        real-time. The source is parsed sequentially, token by token.
 
         Raises:
             StopIteration: The end of the source has been reached.
