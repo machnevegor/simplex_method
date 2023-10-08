@@ -63,5 +63,12 @@ constraints = tuple(
     )
 )
 
-print("Objective functions: ", objective_functions, "\n")
-print("Constraints: ", constraints)
+print("Objective functions:")
+for variable, function in zip(objective_variables, objective_functions):
+    print(variable, function)
+
+print()
+
+print("Constraints:")
+for constraint in constraints:
+    print(constraint)
