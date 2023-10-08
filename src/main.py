@@ -1,4 +1,4 @@
-from ast_parser.parser import Parser, EquationKind
+from ast_parser import Parser, EquationKind
 
 parser = Parser(
     """
@@ -23,7 +23,7 @@ for equation in equations:
 
         equation.bound *= -1.0
         equation.kind = EquationKind.LEQ
-        
+
         continue
 
     if equation.kind == EquationKind.GEQ:
