@@ -54,7 +54,7 @@ class Lexer:
         return self._source
 
     def __iter__(self) -> Lexer:
-        """Gets an iterator over the tokens in the source.
+        """Gets an iterator over the Tokens in the source.
 
         Returns:
             Lexer: An iterator over the tokens in the source.
@@ -62,7 +62,7 @@ class Lexer:
         return self
 
     def __next__(self) -> Token:
-        """Gets the next token from the source.
+        """Gets the next Token from the source.
 
         Raises:
             StopIteration: The end of the source has been reached.

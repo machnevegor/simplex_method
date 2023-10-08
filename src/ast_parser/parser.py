@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -70,8 +72,6 @@ class Parser:
     _linter: Linter
     """Linter of the source."""
 
-    _equations: list[Equation]
-    """List of Equation objects found in the source."""
     _accumulator: EquationAccumulator
     """Equation accumulator."""
 
@@ -79,14 +79,48 @@ class Parser:
         self._lexer = Lexer(source)
         self._linter = Linter(source)
 
-        self._equations = []
         self._accumulator = EquationAccumulator()
 
-    def parse(self) -> list[Equation]:
-        """Parse the source. Return a list of Equation objects.
+    def __iter__(self) -> Parser:
+        """Gets an iterator over the Equations in the source.
 
         Returns:
-            list[Equation]: A list of Equation objects.
+            Parser: _description_
+        """
+        return self
+
+    def __next__(self) -> Equation:
+        """Gets the next Equation in the source.
+
+        Accumulation, processing and validation of Equations in real
+        time. The source is parsed sequentially, token by token.
+
+        Raises:
+            StopIteration: The end of the source has been reached.
+            LexerException: Unexpected character, less than operator is
+                not allowed.
+            LexerException: Unexpected character, greater than operator
+                is not allowed.
+            LexerException: Invalid character: <code>.
+            LexerException: Invalid coefficient, unexpected digit after
+                0: <code>.
+            LexerException: Invalid coefficient, expected digit but
+                got: <code>.
+            LinterException: Unexpected binary operator, term missed.
+            LinterException: Equation must contain only one relational
+                operator.
+            LinterException: Term must contain no more than one
+                variable.
+            LinterException: Unexpected comma at the beginning of the
+                equation.
+            LinterException: Unexpected comma, equation missed.
+            LinterException: Unexpected comma at the end of the
+                equation.
+            LinterException: Equation must contain a relational
+                operator.
+
+        Returns:
+            Equation: The next Equation from the source.
         """
         while True:
             token = next(self._lexer)
@@ -97,9 +131,10 @@ class Parser:
                 case TokenKind.SOF | TokenKind.MUL:
                     continue
                 case TokenKind.EOF:
-                    self._parse_eof()
+                    if token.prev_token.kind == TokenKind.SOF:
+                        raise StopIteration
 
-                    return self._equations
+                    return self._derive_equation()
                 case TokenKind.ADD:
                     self._parse_addition_operator()
 
@@ -121,9 +156,7 @@ class Parser:
 
                     continue
                 case TokenKind.COMMA:
-                    self._parse_comma()
-
-                    continue
+                    return self._derive_equation()
 
     def _extend_variables(self) -> None:
         """Extend the variables with the current variable and
@@ -144,21 +177,21 @@ class Parser:
             else:
                 self._accumulator.bound -= self._accumulator.coefficient
 
-    def _extend_equations(self) -> None:
-        """Extend the equations with the current Equation."""
+    def _derive_equation(self) -> Equation:
+        """Derive the Equation from the EquationAccumulator.
+
+        Returns:
+            Equation: The derived Equation.
+        """
         self._extend_variables()
 
-        self._equations.append(
-            Equation(
-                self._accumulator.kind,
-                self._accumulator.variables,
-                self._accumulator.bound,
-            )
+        equation = Equation(
+            self._accumulator.kind, self._accumulator.variables, self._accumulator.bound
         )
 
-    def _parse_eof(self) -> None:
-        """Parse the EOF Token."""
-        self._extend_equations()
+        self._accumulator = EquationAccumulator()
+
+        return equation
 
     def _parse_addition_operator(self) -> None:
         """Parse the addition operator Token."""
@@ -175,7 +208,11 @@ class Parser:
         self._accumulator.coefficient = -1.0
 
     def _parse_relational_operator(self, token: Token) -> None:
-        """Parse the relational operator Token."""
+        """Parse the relational operator Token.
+
+        Args:
+            token (Token): The relational operator Token.
+        """
         self._extend_variables()
 
         self._accumulator.kind = EquationKind(token.kind.value)
@@ -183,24 +220,26 @@ class Parser:
         self._accumulator.coefficient = None
 
     def _parse_coefficient(self, token: Token) -> None:
-        """Parse the coefficient Token."""
+        """Parse the coefficient Token.
+
+        Args:
+            token (Token): The coefficient Token.
+        """
         if not self._accumulator.coefficient:
             self._accumulator.coefficient = 1.0
 
         self._accumulator.coefficient *= float(token.value)
 
     def _parse_variable(self, token: Token) -> None:
-        """Parse the variable Token."""
+        """Parse the variable Token.
+
+        Args:
+            token (Token): The variable Token.
+        """
         if not self._accumulator.coefficient:
             self._accumulator.coefficient = 1.0
 
         self._accumulator.variable = token.value
-
-    def _parse_comma(self) -> None:
-        """Parse the comma Token."""
-        self._extend_equations()
-
-        self._accumulator = EquationAccumulator()
 
 
 __all__ = ("EquationKind", "Equation", "Parser")

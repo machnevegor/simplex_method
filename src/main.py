@@ -23,7 +23,5 @@ parser = Parser(
     """
 )
 
-for equation in parser.parse():
-    print(equation, "\n")
-
-# solver.Solver()
+for equation in parser:
+    print(equation)

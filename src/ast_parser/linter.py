@@ -39,12 +39,15 @@ class Linter:
             LinterException: Unexpected binary operator, term missed.
             LinterException: Equation must contain only one relational
                 operator.
-            LinterException: Term must contain no more than one variable.
+            LinterException: Term must contain no more than one
+                variable.
             LinterException: Unexpected comma at the beginning of the
                 equation.
             LinterException: Unexpected comma, equation missed.
-            LinterException: Unexpected comma at the end of the equation.
-            LinterException: Equation must contain a relational operator.
+            LinterException: Unexpected comma at the end of the
+                equation.
+            LinterException: Equation must contain a relational
+                operator.
         """
         if token.kind != TokenKind.SOF and (
             token.prev_token is None or token.prev_token.next_token is not token
