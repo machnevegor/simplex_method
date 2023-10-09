@@ -20,11 +20,20 @@ class Solver:
             for key in self.objective_functions.keys():
                 if key not in temp_dict.variables:
                     temp_dict.variables[key] = 0
+                
+        slack = len(self.constraints)
+        i = 0
         
-        for i, constraint in enumerate(self.constraints):
+        for _, constraint in enumerate(self.constraints):
             if constraint.kind == EquationKind.LEQ:
                 constraint.variables["s_" + str(i)] = 1.0
                 self.objective_functions["s_" + str(i)] = 0
+                i += 1
+
+        while i < slack:
+            constraint.variables["s_" + str(i)] = 1.0
+            self.objective_functions["s_" + str(i)] = 0
+            i += 1
 
         A, B, C = self.convert_to_matrices()
 
@@ -59,27 +68,26 @@ class Solver:
     def advanced_simplex(self, A, b, C):
         n, m = A.shape
 
-        B = np.zeros((n, n))
+        B = np.eye(n)
         C_B = np.zeros((1, n))
 
-        for i in range(n):
-            for j in range(n):
-                B[i, j] = A[i, j]
-
-        for i in range(n):
-            C_B[0, i] = C[0, i]
-
         count = 0
-        while count < 5:
-            count += 1
-            
-            B_inverse = np.linalg.inv(B)
-            X_B = np.matmul(B_inverse, b)
-            P_table = np.round(np.matmul(B_inverse, A), 3)
-            objective_values = np.matmul(C_B, P_table) - C
-            solution = np.round(np.matmul(C_B, X_B), 2)
 
-            if np.all(objective_values >= 0):
+        prev_solution = float('inf')
+        while True:
+            count += 1
+            B_inverse = np.around(np.linalg.inv(B), decimals=2)
+            for row in B_inverse:
+                for value in row:
+                    if value == -0:
+                        value = 0
+
+            X_B = np.matmul(B_inverse, b)
+            P_table = np.round(np.matmul(B_inverse, A), 4)
+            objective_values = np.matmul(C_B, P_table) - C
+            solution = np.round(np.matmul(C_B, X_B), 4)
+            
+            if abs(prev_solution - solution) < 0.0001:
                 return X_B, solution
 
             entering_var_idx = np.argmin(objective_values)
@@ -94,3 +102,5 @@ class Solver:
             exiting_var_idx = np.argmin(ratios)
 
             B[:, exiting_var_idx] = A[:, entering_var_idx]
+            C_B[:, exiting_var_idx] = C[:, entering_var_idx]
+            prev_solution = solution
