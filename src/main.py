@@ -1,4 +1,5 @@
 from ast_parser import Parser, EquationKind
+from algorithm import solver
 
 parser = Parser(
     """
@@ -63,12 +64,4 @@ constraints = tuple(
     )
 )
 
-print("Objective functions:")
-for variable, function in zip(objective_variables, objective_functions):
-    print(variable, function)
-
-print()
-
-print("Constraints:")
-for constraint in constraints:
-    print(constraint)
+solver.Solver(objective_functions, constraints)
