@@ -1,6 +1,5 @@
 import numpy as np
-from ast_parser.parser import EquationKind, Equation
-# from ast_parser.token import TokenKind
+from ast_parser.parser import EquationKind
 
 import numpy as np
 
@@ -13,8 +12,6 @@ class Solver:
 
         for i, _ in enumerate(constraints):
             self.constraints.append(constraints[i])
-        
-        # print(type(self.objective_functions), '\n')
 
         for key in self.objective_functions:
             self.objective_functions[key] *= -1
@@ -29,18 +26,12 @@ class Solver:
                 constraint.variables["s_" + str(i)] = 1.0
                 self.objective_functions["s_" + str(i)] = 0
 
-        # print(self.constraints)
         A, B, C = self.convert_to_matrices()
-
-        # print(A, '\n')
-        # print(B, '\n')
-        # print(C, '\n')
 
         objective_values, solution = self.advanced_simplex(A, B, C)
 
         print("The vector of decision variables is : " , objective_values, '\n')
         print("The optimal solution is ", solution , '\n')
-
 
     
     def convert_to_matrices(self):
@@ -78,17 +69,16 @@ class Solver:
         for i in range(n):
             C_B[0, i] = C[0, i]
 
-        # count = 0
-        while True:
-            # count += 1
+        count = 0
+        while count < 5:
+            count += 1
+            
             B_inverse = np.linalg.inv(B)
             X_B = np.matmul(B_inverse, b)
             P_table = np.round(np.matmul(B_inverse, A), 3)
             objective_values = np.matmul(C_B, P_table) - C
             solution = np.round(np.matmul(C_B, X_B), 2)
 
-            # print(objective_values, '\n')
-            # print("I am getting here")
             if np.all(objective_values >= 0):
                 return X_B, solution
 

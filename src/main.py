@@ -1,19 +1,12 @@
 from ast_parser import Parser, EquationKind
 from algorithm import solver
 
-parser = Parser(
-    """
-        6x_1 + 4x_2 <= 24,
+print("Enter constraints in the format '6x_1 + 4x_2 <= 24,' (end with a comma) followed by \n")
+print("the objective function in the format 'Z = 5x_1 + 4x_2' (no comma).")
+input_equation = input()
 
-        x_1 + 2x_2 <= 6,
+parser = Parser(input_equation)
 
-        x_1 + x_2 <= 1,
-
-        x_2 <= 2,
-
-        Z = 5x_1 + 4x_2
-    """
-)
 
 equations = tuple(parser)
 
