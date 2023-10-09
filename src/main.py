@@ -1,22 +1,11 @@
 from ast_parser import Parser, EquationKind
 from algorithm import solver
 
-# print("Enter constraints in the format '6x_1 + 4x_2 <= 24,' (end with a comma) followed by \n")
-# print("the objective function in the format 'Z = 5x_1 + 4x_2' (no comma).")
-# input_equation = input()
+print("Enter all equations, following each with a comma. The last equation should be without a comma")
+print("As an example 'Z = 5x_1 + 4x_2', '6x_1 + 4x_2 <= 24'")
+input_equation = input()
 
-# parser = Parser(input_equation)
-
-parser = Parser(
-    """
-        Z = 16x_1 + 17x_2 + 10x_3,
-        x_1 + 2x_2 + 4x_3 <= 2000,
-        2x_1 + x_2 + x_3 <= 3600,
-        x_1 + 2x_2 + 2x_3 <= 2400,
-        x_1 <= 30
-    """
-)
-
+parser = Parser(input_equation)
 
 equations = tuple(parser)
 
