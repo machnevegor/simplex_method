@@ -150,6 +150,11 @@ class Lexer:
         position = start
 
         while position < len(self._source) and predicate(ord(self._source[position])):
+            print(
+                self._source[position],
+                ord(self._source[position]),
+                is_digit(ord(self._source[position])),
+            )
             position += 1
 
         return position
@@ -217,7 +222,7 @@ class Lexer:
             position += 1
             code = self._read_code(position)
 
-            position += self._read_digits(position, code)
+            position = self._read_digits(position, code)
             code = self._read_code(position)
 
         # Exponent.
