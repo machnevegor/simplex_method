@@ -150,11 +150,11 @@ class Lexer:
         position = start
 
         while position < len(self._source) and predicate(ord(self._source[position])):
-            print(
-                self._source[position],
-                ord(self._source[position]),
-                is_digit(ord(self._source[position])),
-            )
+            # print(
+            #     self._source[position],
+            #     ord(self._source[position]),
+            #     is_digit(ord(self._source[position])),
+            # )
             position += 1
 
         return position
