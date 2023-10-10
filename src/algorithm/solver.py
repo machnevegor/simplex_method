@@ -1,10 +1,17 @@
 import numpy as np
-from ast_parser.parser import EquationKind
-
-import numpy as np
+from ast_parser.parser import EquationKind  # Assuming EquationKind is imported from another module
 
 class Solver:
+    """Solver takes in the equations which have been parsed from the input,
+    it converts them to matrix arrays and applies the matrix operations on 
+    them.
+
+    Args:
+        objective_functions (list of Equation objects): List of objective functions.
+        constraints (list of Equation objects): List of constraint equations.
+    """
     def __init__(self, objective_functions, constraints):
+        # Extract objective function variables and negate their coefficients
         self.objective_functions = objective_functions[0].variables
         self.objective_functions.pop('Z')
 
@@ -13,9 +20,11 @@ class Solver:
         for i, _ in enumerate(constraints):
             self.constraints.append(constraints[i])
 
+        # Negate coefficients of objective function for maximization
         for key in self.objective_functions:
             self.objective_functions[key] *= -1
 
+        # Add slack variables to constraints if necessary
         for temp_dict in constraints:
             for key in self.objective_functions.keys():
                 if key not in temp_dict.variables:
@@ -44,13 +53,19 @@ class Solver:
 
     
     def convert_to_matrices(self):
+        """Converts objective functions and constraints to matrices.
+
+        Returns:
+            A (numpy.ndarray): Coefficients matrix for constraints.
+            B (numpy.ndarray): Right-hand side matrix for constraints.
+            C (numpy.ndarray): Coefficients matrix for objective function.
+        """
         num_constraints = len(self.constraints)
         num_variables = len(self.objective_functions)
 
         A = np.zeros((num_constraints, num_variables))
         C = np.zeros((1, num_variables))
         B = np.zeros((num_constraints, 1))
-
 
         for i, constraint in enumerate(self.constraints):
             for variable_name, coefficient in constraint.variables.items():
@@ -66,6 +81,17 @@ class Solver:
         return A, B, C
 
     def advanced_simplex(self, A, b, C):
+        """Performs the advanced simplex algorithm to find the optimal solution.
+
+        Args:
+            A (numpy.ndarray): Coefficients matrix for constraints.
+            b (numpy.ndarray): Right-hand side matrix for constraints.
+            C (numpy.ndarray): Coefficients matrix for objective function.
+
+        Returns:
+            objective_values (numpy.ndarray): The values of the objective function variables.
+            solution (float): The optimal solution value.
+        """
         n, m = A.shape
 
         B = np.eye(n)
