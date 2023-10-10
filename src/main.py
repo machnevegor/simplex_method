@@ -3,9 +3,19 @@ from algorithm import solver
 
 print("Enter all equations, following each with a comma. The last equation should be without a comma")
 print("As an example 'Z = 5x_1 + 4x_2', '6x_1 + 4x_2 <= 24'")
-input_equation = input()
+# input_equation = input()
 
-parser = Parser(input_equation)
+# parser = Parser(input_equation)
+
+parser = Parser(
+    """
+        Z = 5x_1 + 4x_2, 
+        6x_1 + 4x_2 <= 24, 
+        x_1 + 2x_2 <= 6, 
+        -x_1 + x_2 <= 1, 
+        x_2 <= 2
+    """
+)
 
 equations = tuple(parser)
 

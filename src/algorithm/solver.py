@@ -46,9 +46,11 @@ class Solver:
 
         A, B, C = self.convert_to_matrices()
 
-        objective_values, solution = self.advanced_simplex(A, B, C)
-
-        print("The vector of decision variables is : " , objective_values, '\n')
+        objective_values, solution, variable_names = self.advanced_simplex(A, B, C)
+        variable_names = list(variable_names.values())
+        print("The vector of decision variables is : ")
+        for i in range(len(objective_values)):
+            print(variable_names[i], ": ", round(objective_values[i, 0], 2))
         print("The optimal solution is ", solution , '\n')
 
     def convert_to_matrices(self):
@@ -97,7 +99,10 @@ class Solver:
         C_B = np.zeros((1, n))
 
         count = 0
-
+        
+        variable_names = list(self.objective_functions.keys())[-n:]  
+        variable_names = {key: value for key, value in zip(range(n), variable_names)}
+       
         prev_solution = float('inf')
         while True:
             count += 1
@@ -108,12 +113,12 @@ class Solver:
                         value = 0
 
             X_B = np.matmul(B_inverse, b)
-            P_table = np.round(np.matmul(B_inverse, A), 4)
+            P_table = np.round(np.matmul(B_inverse, A), 2)
             objective_values = np.matmul(C_B, P_table) - C
-            solution = np.round(np.matmul(C_B, X_B), 4)
+            solution = np.round(np.matmul(C_B, X_B), 2)
             
             if abs(prev_solution - solution) < 0.0001:
-                return X_B, solution
+                return X_B, solution, variable_names
 
             entering_var_idx = np.argmin(objective_values)
 
@@ -125,7 +130,10 @@ class Solver:
                     ratios.append(np.inf)  
 
             exiting_var_idx = np.argmin(ratios)
+            
+            temp_list = list(self.objective_functions.keys())
 
+            variable_names[exiting_var_idx] = temp_list[entering_var_idx]
             B[:, exiting_var_idx] = A[:, entering_var_idx]
             C_B[:, exiting_var_idx] = C[:, entering_var_idx]
             prev_solution = solution
