@@ -51,7 +51,6 @@ class Solver:
         print("The vector of decision variables is : " , objective_values, '\n')
         print("The optimal solution is ", solution , '\n')
 
-    
     def convert_to_matrices(self):
         """Converts objective functions and constraints to matrices.
 
