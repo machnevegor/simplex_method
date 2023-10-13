@@ -10,7 +10,7 @@ Welcome to the Simplex Method Solver project! This program is designed to help y
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Dependencies](#dependencies)
-- [Run_Locally](#run-locally)
+- [Run_Locally](#run_locally)
 
 ## Introduction
 
