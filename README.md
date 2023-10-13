@@ -1,5 +1,5 @@
 # simplex_method
-🔬 Implementation of simplex method.
+🔬 Implementation of the simplex method.
 
 Welcome to the Simplex Method Solver project! This program is designed to help you solve linear programming problems using the simplex method, with a focus on maximization objectives. You can access and use this solver through our website without the need for complex installations.
 
@@ -9,7 +9,6 @@ Welcome to the Simplex Method Solver project! This program is designed to help y
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
-- [Dependencies](#dependencies)
 - [Run_Locally](#run_locally)
 
 ## Introduction
@@ -47,23 +46,15 @@ Using the Maximization Simplex Method Solver is straightforward:
 1. **Input Your Problem:** Enter your linear programming problem. All equations should already be in standard form, meaning, aside the
    the objective function, the inequality present should be "<=". Each equation should also be separated by a comma.
    ```
-    variables  --> x_1, x_2, ...
-    inequality --> <=
-    objective function --> Z
+    variables          ==> x_1, x_2, ...
+    inequality         ==> '<='
+    objective function ==> Z
    ```
 
 3. **Solve:** Click the "Submit" button to initiate the solver.
 
 4. **Review Solution:** Examine the solution to understand the optimal values of your decision variables and the optimal objective function value.
 
-
-## Dependencies
-
-The only package required to run this program is [NumPy](https://numpy.org). You can easily install it using pip:
-
-```bash
-pip install numpy
-```
 ### Run_Locally
 
 To run locally:
@@ -77,6 +68,7 @@ pip install numpy
 ```
 3. cd into the folder and run the main.py
 ```bash
+cd simplex_method
 main.py
 ```
 
