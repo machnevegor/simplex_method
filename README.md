@@ -44,11 +44,17 @@ To get started with the Maximization Simplex Method Solver, simply follow these 
 
 Using the Maximization Simplex Method Solver is straightforward:
 
-1. **Input Your Problem:** Enter your linear programming problem in the format provided on the website.
+1. **Input Your Problem:** Enter your linear programming problem. All equations should already be in standard form, meaning, aside the
+   the objective function, the inequality present should be "<=". Each equation should also be separated by a comma.
+   ```
+    variables  --> x_1, x_2, ...
+    inequality --> <=
+    objective function --> Z
+   ```
 
-2. **Solve:** Click the "Submit" button to initiate the solver.
+3. **Solve:** Click the "Submit" button to initiate the solver.
 
-3. **Review Solution:** Examine the solution to understand the optimal values of your decision variables and the optimal objective function value.
+4. **Review Solution:** Examine the solution to understand the optimal values of your decision variables and the optimal objective function value.
 
 
 ## Dependencies
