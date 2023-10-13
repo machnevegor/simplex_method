@@ -35,7 +35,7 @@ The program primarily handles maximization problems.
 
 To get started with the Maximization Simplex Method Solver, simply follow these steps:
 
-1. Visit our website at [MAX_SIMPLEX_SOLVER]([https://www.your-solver-website.com](https://huggingface.co/spaces/khushpatel2002/Optimization)).
+1. Visit our website at [MAX_SIMPLEX_SOLVER](https://huggingface.co/spaces/khushpatel2002/Optimization).
 2. Input your linear programming problem in the specified format. The solver will guide you through the process.
 3. Click the "Submit" button to find the optimal solution.
 4. Review the solution.
