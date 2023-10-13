@@ -50,6 +50,10 @@ Using the Maximization Simplex Method Solver is straightforward:
     inequality         ==> '<='
     objective function ==> Z
    ```
+   As an example
+   ```
+   Z = 3x_1 + 5x_2 + 4x_3, 2x_1 - 3x_2 <= 8, 2x_2 + 5x_3 <= 10, 3x_1 + 2x_2 + 4x_3 <= 15
+   ```
 
 3. **Solve:** Click the "Submit" button to initiate the solver.
 
