@@ -5,16 +5,25 @@ Welcome to the Simplex Method Solver project! This program is designed to help y
 
 ## Table of Contents
 - [Introduction](#introduction)
+- [Team](#team)
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Dependencies](#dependencies)
-- [Contributing](#contributing)
-- [License](#license)
+- [Run_Locally](#run-locally)
 
 ## Introduction
 
 The program primarily handles maximization problems. 
+
+## Team
+
+- Adewuyi Israel Oluwajuwon
+- Egor Machnev
+- Khush Patel
+- Yehia Sobeh
+- Hadi Salloum
+- Mike Tezin
 
 ## Features
 
@@ -28,7 +37,7 @@ To get started with the Maximization Simplex Method Solver, simply follow these 
 
 1. Visit our website at [MAX_SIMPLEX_SOLVER]([https://www.your-solver-website.com](https://huggingface.co/spaces/khushpatel2002/Optimization)).
 2. Input your linear programming problem in the specified format. The solver will guide you through the process.
-3. Click the "Solve" button to find the optimal solution.
+3. Click the "Submit" button to find the optimal solution.
 4. Review the solution.
 
 ## Usage
@@ -37,7 +46,7 @@ Using the Maximization Simplex Method Solver is straightforward:
 
 1. **Input Your Problem:** Enter your linear programming problem in the format provided on the website.
 
-2. **Solve:** Click the "Solve" button to initiate the solver.
+2. **Solve:** Click the "Submit" button to initiate the solver.
 
 3. **Review Solution:** Examine the solution to understand the optimal values of your decision variables and the optimal objective function value.
 
@@ -48,3 +57,22 @@ The only package required to run this program is [NumPy](https://numpy.org). You
 
 ```bash
 pip install numpy
+```
+### Run_Locally
+
+To run locally:
+1. Clone the repository
+```bash
+git clone https://github.com/machnevegor/simplex_method
+```
+2. Install the dependency
+```bash
+pip install numpy
+```
+3. cd into the folder and run the main.py
+```bash
+main.py
+```
+
+
+Enjoy!
